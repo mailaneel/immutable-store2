@@ -16,16 +16,22 @@ export default class Store extends EventEmitter {
         });
 
         this.collectionClass = options.collectionClass;
-        this.store = {};
+        this.collections = {};
 
     }
 
+    clear(){
+        _.each(this.collections, function(collection){
+           collection.clear();
+        });
+    }
+
     collection(collectionName) {
-        if (!this.store[collectionName]) {
-            this.store[collectionName.toLowerCase()] = this.createCollection(collectionName);
+        if (!this.collections[collectionName]) {
+            this.collections[collectionName.toLowerCase()] = this.createCollection(collectionName);
         }
 
-        return this.store[collectionName];
+        return this.collections[collectionName];
     }
 
     createCollection(collectionName, options) {

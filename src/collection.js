@@ -163,6 +163,11 @@ export default class Collection extends EventEmitter {
         return false;
     }
 
+    clear(){
+        this.data = [];
+        this._triggerChange();
+    }
+
     count() {
         return this.data.length;
     }
