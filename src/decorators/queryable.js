@@ -2,7 +2,18 @@ import _ from 'underscore';
 import _Query from 'underscore-query';
 var _q = _Query(_, false);
 
-
+/**
+ *
+ * subscribed query will be run against collection's data
+ * every time there is change in collection and then calls callback given
+ *
+ * please see tests for now
+ *
+ *
+ * @param Collection
+ * @returns {*}
+ * @constructor
+ */
 export default function Queryable(Collection) {
 
     return class QueryableCollection extends Collection{
@@ -10,13 +21,23 @@ export default function Queryable(Collection) {
             return _q(this.data, q);
         };
 
-        build() {
+        buildQuery() {
             return _q.build(this.data);
         };
 
-        applyQueries(collection){
+        applyQuery(query){
+            var self = this;
+            setTimeout(function(){
+                query.cb.call(null, self.query(query.query));
+            }, 0);
+
+            return this;
+        }
+
+        applyAllQueries(){
+            var self = this;
             _.each(this.queries, function(query){
-                query.cb.call(null, collection.query(query));
+                self.applyQuery(query);
             });
 
             return this;
@@ -26,7 +47,7 @@ export default function Queryable(Collection) {
 
             if (!this.queries) {
                 this.queries = {};
-                this.on('change', _.bind(this.applyQueries, this));
+                this.on('change', _.bind(this.applyAllQueries, this));
             }
 
             var self = this;
@@ -44,6 +65,8 @@ export default function Queryable(Collection) {
                 cb: cb
             };
 
+            // if collection has got data already we should execute query and callback
+            this.applyQuery(this.queries[queryId]);
             return getUnsubscribeFn(queryId);
         };
 

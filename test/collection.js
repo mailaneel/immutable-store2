@@ -2,6 +2,7 @@ var assert = require('chai').assert;
 var Collection = require('../lib/collection');
 
 var Immutable = require('../lib/decorators/immutable');
+var Queryable = require('../lib/decorators/queryable');
 
 
 describe('Collection', function () {
@@ -145,6 +146,29 @@ describe('ImmutableCollection', function(){
             // if obj is changed it should return new obj
             collection.update(1, {name: 'd'});
             assert.notEqual(previousObj, collection.get(1));
+        });
+    });
+});
+
+describe('QueryableCollection', function(){
+    describe('#subscribeToQuery', function () {
+        it('should execute query on change and call the callback with data', function (done) {
+
+            var QueryableCollection = Queryable(Collection);
+            var collection = new QueryableCollection('people');
+            var isInitial = true;
+            collection.subscribeToQuery({likes: {$gt: 3}}, function(data){
+                if(data.length == 2 && !isInitial){
+                    done();
+                }else{
+                    isInitial = false;
+                }
+            });
+
+            collection.insert({likes: 5});
+            collection.insert({likes: 4});
+            collection.insert({likes: 3});
+            collection.insert({likes: 2});
         });
     });
 });
