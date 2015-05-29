@@ -4,8 +4,8 @@ var Collection = require('../../lib/collection');
 
 describe('CollectionDecorator', function () {
     it('should decorate collection', function () {
-
-        var comments = new (CollectionDecorator(function(){}));
+        function Comments(){}
+        var comments = new (CollectionDecorator(Comments));
         assert.instanceOf(comments, Collection);
     });
 
