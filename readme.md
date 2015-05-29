@@ -26,7 +26,7 @@ console.log(comment === updatedComment) // logs false
 
 
 //queryable
-comments.query({likes: {$gt:4}}); // returns [{id:1, likes:4, cid: 'cid_1'}]
+comments.query({likes: {$gt:4}}); // returns [{id:1, likes:5, cid: 'cid_1'}]
 
 // subscrube to this query
 var unsubscribe = comments.subscribeToQuery({likes: {$gt:4}}, function(data){
