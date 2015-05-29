@@ -8,7 +8,6 @@ import SeamlessImmutable from 'seamless-immutable';
  * @constructor
  */
 export default function Immutable(Collection) {
-
    return  class ImmutableCollection extends Collection{
         _prepareDocForInsert(doc){
             doc = super._prepareDocForInsert(doc);
