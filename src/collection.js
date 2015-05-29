@@ -1,8 +1,5 @@
 import _ from 'underscore';
-import _Query from 'underscore-query';
-var _q = _Query(_, false);
 import EventEmitter from 'eventemitter3';
-import Immutable from 'seamless-immutable';
 
 
 /**
@@ -25,15 +22,13 @@ export default class Collection extends EventEmitter {
             idAttribute: "id",
             cidAttribute: 'cid',
             cidPrefix: 'cid_',
-            bufferTime: 1, //in ms,
-            useLocalStorage: true // this will start using local storage if used with local store
+            bufferTime: 1 //in ms,
         });
 
         this.name = name || _.uniqueId('collection_');
         this.idAttribute = options.idAttribute;
         this.cidAttribute = options.cidAttribute;
         this.cidPrefix = options.cidPrefix;
-        this.useLocalStorage = options.useLocalStorage;
 
         // we buffer events for predefined time instead of firing change events straight away
         this._isBufferingEvents = false;
@@ -121,20 +116,7 @@ export default class Collection extends EventEmitter {
             return this._insert(doc);
         }
 
-        var isChanged = false;
-        var mergedDoc = existingDoc.merge(doc);
-        if (mergedDoc !== existingDoc) {
-            isChanged = true;
-        }
-
-        if (!isChanged) {
-            return existingDoc;
-        }
-
-        var index = this.findIndex(existingDoc);
-        if(index !== -1){
-            this.data[index] = mergedDoc;
-        }
+        var mergedDoc = this._prepareDocForUpdate(existingDoc, doc);
 
         this._updateIndex(mergedDoc);
         this._triggerChange();
@@ -182,16 +164,16 @@ export default class Collection extends EventEmitter {
      * @returns {*}
      * @private
      */
-    _prepareDoc(doc) {
+    _prepareDocForInsert(doc) {
         if (!doc[this.cidAttribute]) {
             doc[this.cidAttribute] = _.uniqueId(this.cidPrefix);
         }
 
-        if (!Immutable.isImmutable(doc)) {
-            doc = Immutable(doc);
-        }
-
         return doc;
+    }
+
+    _prepareDocForUpdate(existingDoc, newDoc){
+       return _.extend(existingDoc, newDoc);
     }
 
     /**
@@ -201,7 +183,7 @@ export default class Collection extends EventEmitter {
      * @private
      */
     _insert(doc) {
-        doc = this._prepareDoc(doc);
+        doc = this._prepareDocForInsert(doc);
         this.data.push(doc);
         this._addIndex(doc);
         this._triggerChange();
@@ -282,19 +264,6 @@ export default class Collection extends EventEmitter {
                 self.emit('change', self);
             }, this._bufferTime);
         }
-    }
-
-    /**
-     *
-     * @param {{}} q
-     * @returns {*}
-     */
-    query(q) {
-        return _q(this.data, q);
-    }
-
-    build() {
-        return _q.build(this.data);
     }
 }
 

@@ -6,7 +6,7 @@ gulp.task('default', ['build'], function () {
 });
 
 gulp.task('build', function(){
-    return gulp.src('./src/**.js')
-        .pipe(babel({optional:'runtime'}))
+    return gulp.src('./src/**/*.js')
+        .pipe(babel({optional:'runtime', stage: 1}))
         .pipe(gulp.dest('./lib/'));
 });
