@@ -37,5 +37,9 @@ var unsubscribe = comments.subscribeToQuery({likes: {$gt:4}}, function(data){
 // when component is unmounted or not needed any more
 unsubscribe();
 
+//events
+comments.on('change', function(collection){
+// triggers for every update, insert, remove
+});
 
 ```

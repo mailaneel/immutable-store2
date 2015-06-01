@@ -32,8 +32,12 @@ export default function LocalStorageAware(Collection) {
         bindLocalStorage() {
 
             if (!localStorage.enabled) {
-                throw new Error('Local storage is not supported by your browser. ' +
-                    'Please disable "Private Mode", or upgrade to a modern browser.');
+                if (console && console.log) {
+                    console.log('Local storage is not supported by your browser. ' +
+                        'Please disable "Private Mode", or upgrade to a modern browser.');
+                }
+
+                return;
             }
 
             var collection = this;
@@ -43,7 +47,7 @@ export default function LocalStorageAware(Collection) {
 
             localStorage.forEach(function (collectionName, data) {
                 collectionName = store.removeNamespaceFromKey(collectionName);
-                if(collectionName && collectionName == collection.name){
+                if (collectionName && collectionName == collection.name) {
                     _.each(data, function (doc) {
                         collection.insert(doc);
                     });
@@ -53,7 +57,7 @@ export default function LocalStorageAware(Collection) {
 
         clear() {
             super.clear();
-            LocalStore.clear();
+            localStorage.clear();
         }
     }
 }
