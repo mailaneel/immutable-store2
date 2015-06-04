@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import EventEmitter from 'eventemitter3';
 import Immutable from 'seamless-immutable';
+import utils from './utils';
 
 export default class Model extends EventEmitter {
     constructor(name, options) {
@@ -27,11 +28,11 @@ export default class Model extends EventEmitter {
     }
 
     isCid(id) {
-        return (_.isString(id) && (new RegExp(this.cidPrefix + '.+')).test(id));
+        return utils.isCid(id, this.cidPrefix);
     }
 
     isId(id) {
-        return (!this.isCid(id) && (_.isString(id) || _.isNumber(id)));
+        return utils.isId(id, this.cidPrefix);
     }
 
     set(key, val) {
