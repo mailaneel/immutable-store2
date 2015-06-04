@@ -15,7 +15,7 @@ describe('Store', function () {
     describe('#createCollection', function () {
         it('should create collection with given options', function () {
             var store = new Store();
-            var collection = store.registerCollection(new Collection('people'));
+            var collection = store.registerCollection(new Collection([], {name: 'people'}));
             assert.instanceOf(store.collections['people'], Collection);
             assert.equal(store.collections['people'], collection);
 
@@ -34,7 +34,7 @@ describe('Store', function () {
 
         it('should trigger change event using change event', function(done){
             var store = new Store();
-            var collection = store.registerCollection(new Collection('people'));
+            var collection = store.registerCollection(new Collection(null, {name:'people'}));
             store.on('change', function(){
                 done();
             });
@@ -43,7 +43,7 @@ describe('Store', function () {
 
         it('should trigger change event using change:collectionName event', function(done){
             var store = new Store();
-            var collection = store.registerCollection(new Collection('people'));
+            var collection = store.registerCollection(new Collection(null, {name: 'people'}));
             store.on('change:people', function(){
                 done();
             });

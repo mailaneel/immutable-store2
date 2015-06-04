@@ -13,9 +13,13 @@ describe('Model', function () {
         });
 
         it('should override options if given', function () {
-            var model = new Model('person', {idAttribute: '_id'});
+            var model = new Model(null, {idAttribute: '_id'});
             assert.equal(model.idAttribute, '_id');
-            assert.equal(model.name, 'person');
+        });
+
+        it('should create model with initial data if given', function () {
+            var model = new Model({id:1, name: 'a'});
+            assert.equal(model.get('id'), 1);
         });
     });
 
@@ -39,14 +43,14 @@ describe('Model', function () {
 
     describe('#set', function () {
         it('should set by hash of key val', function () {
-            var model = new Model('person');
+            var model = new Model();
             model.set({id: 1, name: 'a'});
             assert.equal(model.get('id'), 1);
             assert.equal(model.get('name'),'a');
         });
 
         it('should update value if key already exists', function () {
-            var model = new Model('person');
+            var model = new Model();
             model.set({id: 1, name: 'a'});
             assert.equal(model.get('name'),'a');
             model.set({name: 'b'});
@@ -56,7 +60,7 @@ describe('Model', function () {
 
     describe('#get', function () {
         it('should return  value by key', function () {
-            var model = new Model('person');
+            var model = new Model();
             model.set({id: 1, name: 'a'});
             assert.equal(model.get('name'), 'a');
         });
@@ -64,7 +68,7 @@ describe('Model', function () {
 
     describe('#remove', function () {
         it('should remove by key', function () {
-            var model = new Model('person');
+            var model = new Model();
             model.set({id: 1, name: 'a'});
             assert.equal(model.get('name'), 'a');
             model.remove('name');
@@ -74,7 +78,7 @@ describe('Model', function () {
 
     describe('#clear', function () {
         it('should clear model', function () {
-            var model = new Model('person');
+            var model = new Model();
             model.set({id: 1, name: 'a'});
             assert.equal(model.get('name'), 'a');
             model.clear();

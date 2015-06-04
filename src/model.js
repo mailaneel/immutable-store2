@@ -4,21 +4,26 @@ import Immutable from 'seamless-immutable';
 import utils from './utils';
 
 export default class Model extends EventEmitter {
-    constructor(name, options) {
+    constructor(attrs, options) {
         super();
         options = _.defaults((options || {}), {
             idAttribute: 'id',
             cidAttribute: 'cid',
-            cidPrefix: 'cid_'
+            cidPrefix: 'cid_',
+            name: _.uniqueId('model_')
         });
 
-        this.name = name || _.uniqueId('model_');
+        this.name = options.name;
         this.idAttribute = options.idAttribute;
         this.cidAttribute = options.cidAttribute;
         this.cidPrefix = options.cidPrefix;
 
 
         this.data = Immutable(this._getDefaultData());
+
+        if(attrs){
+            this.set(attrs);
+        }
     }
 
     _getDefaultData(){

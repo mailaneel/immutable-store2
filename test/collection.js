@@ -15,10 +15,15 @@ describe('Collection', function () {
         });
 
         it('should override options if given', function () {
-            var collection = new Collection('people', {idAttribute: '_id'});
+            var collection = new Collection([], {idAttribute: '_id'});
             assert.equal(collection.idAttribute, '_id');
-            assert.equal(collection.name, 'people');
         });
+
+        it('should create collection with initial data if given', function () {
+            var collection = new Collection([{id:1, name: 'a'}]);
+            assert.equal(collection.count(), 1);
+        });
+
     });
 
     describe('#isCid', function () {
@@ -40,7 +45,7 @@ describe('Collection', function () {
 
     describe('#get', function () {
         it('should return doc by id, cid, doc', function () {
-            var collection = new Collection('people');
+            var collection = new Collection();
             collection.insert({id: 1, name: 'a'});
             assert.equal(collection.get(1).name, 'a');
             assert.equal(collection.get({id: 1}).name, 'a');
@@ -50,13 +55,13 @@ describe('Collection', function () {
 
     describe('#insert', function () {
         it('should insert object', function () {
-            var collection = new Collection('people');
+            var collection = new Collection();
             collection.insert({id: 1, name: 'a'});
             assert.equal(collection.count(), 1);
         });
 
         it('should update object if it already exists', function () {
-            var collection = new Collection('people');
+            var collection = new Collection();
             collection.insert({id: 1, name: 'a'});
             assert.equal(collection.count(), 1);
             collection.insert({id: 1, name: 'b'});
@@ -67,7 +72,7 @@ describe('Collection', function () {
 
     describe('#update', function () {
         it('should update object by id or cid', function () {
-            var collection = new Collection('people');
+            var collection = new Collection();
             collection.insert({id: 1, name: 'a'});
             assert.equal(collection.count(), 1);
             collection.update({id: 1, name: 'b'});
@@ -92,7 +97,7 @@ describe('Collection', function () {
 
     describe('#remove', function () {
         it('should remove object by id or cid or object', function () {
-            var collection = new Collection('people');
+            var collection = new Collection();
             collection.insert({id: 1, name: 'a'});
             collection.insert({id: 2, name: 'b'});
             collection.insert({id: 3, name: 'c'});

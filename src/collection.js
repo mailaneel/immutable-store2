@@ -22,16 +22,17 @@ export default class Collection extends EventEmitter {
         return doc1 === doc2;
     }
 
-    constructor(name, options) {
+    constructor(data, options) {
         super();
         options = _.defaults((options || {}), {
             idAttribute: 'id',
             cidAttribute: 'cid',
             cidPrefix: 'cid_',
-            bufferTime: 1 //in ms,
+            bufferTime: 1, //in ms,
+            name: _.uniqueId('collection_')
         });
 
-        this.name = name || _.uniqueId('collection_');
+        this.name = options.name;
         this.idAttribute = options.idAttribute;
         this.cidAttribute = options.cidAttribute;
         this.cidPrefix = options.cidPrefix;
@@ -46,6 +47,10 @@ export default class Collection extends EventEmitter {
 
         this.data = [];
         this._ensureIndex();
+
+        if(data && _.isArray(data)){
+            _.each(data, _.bind(this.insert, this));
+        }
     }
 
     /**
