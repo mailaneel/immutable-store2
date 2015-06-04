@@ -1,10 +1,6 @@
 var assert = require('chai').assert;
 var Collection = require('../lib/collection');
 
-var Immutable = require('../lib/decorators/immutable');
-var Queryable = require('../lib/decorators/queryable');
-
-
 describe('Collection', function () {
     describe('#instance', function () {
         it('should create a instance with default options', function () {
@@ -81,6 +77,16 @@ describe('Collection', function () {
             collection.update(1, {name: 'c'});
             assert.equal(collection.count(), 1);
             assert.equal(collection.get(1).name, 'c');
+
+            // if obj is not updated it should return same immutable obj
+            var previousObj = collection.get(1);
+            collection.update(1, {name: 'c'});
+            assert.equal(previousObj, collection.get(1));
+
+            // if obj is changed it should return new obj
+            collection.update(1, {name: 'd'});
+            assert.notEqual(previousObj, collection.get(1));
+
         });
     });
 

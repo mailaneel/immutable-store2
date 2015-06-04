@@ -1,16 +1,16 @@
 #Immutable Store
-** Still under development **
+
+** under development **
 
 Allows Immutable, Local Storage, Queryable Collections using decorators
 
 ```js
-import {Collection, Immutable, Queryable, LocalStorageAware} from 'immutable-store';
+import {ImmutableModel, ImmutableCollection, Queryable, LocalStorageAware} from 'immutable-store';
 
 @LocalStorageAware
 @Queryable
-@Immutable
 // collection should be the first decorator for other decorators to work
-@Collection
+@ImmutableCollection
 class Comments{
 }
 
@@ -28,7 +28,7 @@ console.log(comment === updatedComment) // logs false
 //queryable
 comments.query({likes: {$gt:4}}); // returns [{id:1, likes:5, cid: 'cid_1'}]
 
-// subscrube to this query
+// subscribe to this query
 var unsubscribe = comments.subscribeToQuery({likes: {$gt:4}}, function(data){
    // collection will be queried and called with new data every time collection changes
    // when subscribed first time it will query existing data 
@@ -40,6 +40,21 @@ unsubscribe();
 //events
 comments.on('change', function(collection){
 // triggers for every update, insert, remove
+});
+
+
+@ImmutableModel
+class Comment{
+}
+
+var comment = new Comment();
+comment.set({id:1, likes: 5});
+comment.get('likes'); // returns 5
+comment.remove('likes');
+comment.clear();
+
+comment.on('change', function(){
+
 });
 
 ```

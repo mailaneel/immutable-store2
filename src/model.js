@@ -1,0 +1,93 @@
+import _ from 'underscore';
+import EventEmitter from 'eventemitter3';
+import Immutable from 'seamless-immutable';
+
+export default class Model extends EventEmitter {
+    constructor(name, options) {
+        super();
+        options = _.defaults((options || {}), {
+            idAttribute: 'id',
+            cidAttribute: 'cid',
+            cidPrefix: 'cid_'
+        });
+
+        this.name = name || _.uniqueId('model_');
+        this.idAttribute = options.idAttribute;
+        this.cidAttribute = options.cidAttribute;
+        this.cidPrefix = options.cidPrefix;
+
+
+        this.data = Immutable(this._getDefaultData());
+    }
+
+    _getDefaultData(){
+        var defaultData = {};
+        defaultData[this.cidAttribute] = _.uniqueId(this.cidPrefix);
+        return defaultData;
+    }
+
+    isCid(id) {
+        return (_.isString(id) && (new RegExp(this.cidPrefix + '.+')).test(id));
+    }
+
+    isId(id) {
+        return (!this.isCid(id) && (_.isString(id) || _.isNumber(id)));
+    }
+
+    set(key, val) {
+
+        var attrs = {};
+        if (!_.isObject(key)) {
+            attrs[key] = val;
+        } else {
+            attrs = key;
+        }
+
+        var data = this.data.merge(attrs);
+
+        if(data !== this.data){
+            this.data = data;
+            this._triggerChange();
+        }
+
+        return this.data;
+    }
+
+    get(key){
+        return this.data[key];
+    }
+
+    remove(key) {
+        if (this.data[key] && (key !== this.cidAttribute)) {
+            var data = this.data.asMutable();
+            delete data[key];
+            this.data = Immutable(data);
+            this._triggerChange();
+        }
+
+        return this.data;
+    }
+
+    clear() {
+        this.data = Immutable(this._getDefaultData());
+        this._triggerChange();
+        return this.data;
+    }
+
+    _triggerChange() {
+        this.emit('change', this);
+    }
+
+    toJSON(){
+        return this.data;
+    }
+}
+
+_.each([
+    'keys', 'values', 'has'
+], function (method) {
+    Model.prototype[method] = function (...rest) {
+        rest.unshift(this.data);
+        return _[method].apply(null, rest);
+    }
+});

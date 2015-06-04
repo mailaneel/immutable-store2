@@ -1,5 +1,6 @@
 import _ from 'underscore';
 import EventEmitter from 'eventemitter3';
+import Immutable from 'seamless-immutable';
 
 
 /**
@@ -19,7 +20,7 @@ export default class Collection extends EventEmitter {
     constructor(name, options) {
         super();
         options = _.defaults((options || {}), {
-            idAttribute: "id",
+            idAttribute: 'id',
             cidAttribute: 'cid',
             cidPrefix: 'cid_',
             bufferTime: 1 //in ms,
@@ -116,7 +117,18 @@ export default class Collection extends EventEmitter {
             return this._insert(doc);
         }
 
-        var mergedDoc = this._prepareDocForUpdate(existingDoc, doc);
+        var mergedDoc = existingDoc.merge(doc);
+
+        // if there are no changes return existing doc
+        if (mergedDoc === existingDoc) {
+            return existingDoc;
+        }
+
+        var index = this.findIndex(existingDoc);
+        if (index !== -1) {
+            this.data[index] = mergedDoc;
+        }
+
 
         this._updateIndex(mergedDoc);
         this._triggerChange();
@@ -145,7 +157,7 @@ export default class Collection extends EventEmitter {
         return false;
     }
 
-    clear(){
+    clear() {
         this.data = [];
         this._triggerChange();
     }
@@ -169,11 +181,11 @@ export default class Collection extends EventEmitter {
             doc[this.cidAttribute] = _.uniqueId(this.cidPrefix);
         }
 
-        return doc;
-    }
+        if (!Immutable.isImmutable(doc)) {
+            doc = Immutable(doc);
+        }
 
-    _prepareDocForUpdate(existingDoc, newDoc){
-       return _.extend(existingDoc, newDoc);
+        return doc;
     }
 
     /**
@@ -214,7 +226,7 @@ export default class Collection extends EventEmitter {
      * @returns {Collection}
      * @private
      */
-    _updateIndex(doc){
+    _updateIndex(doc) {
         this._removeIndex(doc);
         this._addIndex(doc);
         return this;
