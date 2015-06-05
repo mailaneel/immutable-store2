@@ -1,7 +1,7 @@
 import _ from 'underscore';
 import localStorage from 'store';
 import Collection from '../collection';
-import Model from '../Model'
+import Model from '../model'
 
 
 //TODO avoid repeating code
