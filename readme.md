@@ -2,16 +2,16 @@
 
 ** under development **
 
-Allows Immutable, Local Storage, Queryable Collections using decorators
+Allows Immutable, Local Storage, Queryable Collections
+
+#Collection
 
 ```js
 import {Model, Collection, Queryable, LocalStorageAware} from 'immutable-store';
 
 @LocalStorageAware
 @Queryable
-// collection should be the first decorator for other decorators to work
-@Collection
-class Comments{
+class Comments extend Collection{
 }
 
 var comments = new Comments();
@@ -42,9 +42,12 @@ comments.on('change', function(collection){
 // triggers for every update, insert, remove
 });
 
+```
 
-@Model
-class Comment{
+#Model
+
+```js
+class Comment extends Model{
 }
 
 var comment = new Comment();
