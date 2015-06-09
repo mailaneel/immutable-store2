@@ -114,6 +114,18 @@ describe('Collection', function () {
         });
     });
 
+    describe('#query', function () {
+        it('should execute query on change and call the callback with data', function () {
+
+            var collection = new Collection();
+            collection.insert({likes: 5});
+            collection.insert({likes: 4});
+            collection.insert({likes: 3});
+            collection.insert({likes: 2});
+            assert.equal(collection.query({likes: {$gt: 3}}).length, 2);
+        });
+    });
+
     describe('#event-change', function () {
 
         it('should trigger change event', function (done) {

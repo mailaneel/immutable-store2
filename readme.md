@@ -7,10 +7,9 @@ Allows Immutable, Local Storage, Queryable Collections
 #Collection
 
 ```js
-import {Model, Collection, Queryable, LocalStorageAware} from 'immutable-store';
+import {Model, Collection, LocalStorageAware} from 'immutable-store';
 
 @LocalStorageAware
-@Queryable
 class Comments extend Collection{
 }
 

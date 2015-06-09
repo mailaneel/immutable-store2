@@ -2,6 +2,8 @@ import _ from 'underscore';
 import EventEmitter from 'eventemitter3';
 import Immutable from 'seamless-immutable';
 import utils from './utils';
+import _Query from 'underscore-query';
+var _q = _Query(_, false);
 
 /**
  *
@@ -131,6 +133,14 @@ export default class Collection extends EventEmitter {
 
         return removed;
     }
+
+    query(q) {
+        return _q(this.data, q);
+    };
+
+    buildQuery() {
+        return _q.build(this.data);
+    };
 
     clear() {
         this.__clear();
