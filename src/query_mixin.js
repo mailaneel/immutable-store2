@@ -105,6 +105,7 @@ export default {
 
             if (self.hasSubscribeToStore(storeName)){
                 self._storeSubscriptions[storeName].queries = storeQueries;
+                self._updateState(self._queryStore(store, storeQueries));
             }else{
                 self._storeSubscriptions[storeName] = {
                     listener: self._getListenerForStore(storeName),
@@ -122,41 +123,6 @@ export default {
 
     hasSubscribeToStore(storeName){
         return !!(this._storeSubscriptions[storeName]);
-    },
-
-    _getListenerForStore(storeName){
-        var self = this;
-
-        return function () {
-
-            // this is to make sure we are still subscribed to store
-            if(!self.hasSubscribeToStore(storeName)){
-                return;
-            }
-
-            var store = self._storeSubscriptions[storeName].store;
-            var queries = self._storeSubscriptions[storeName].queries;
-
-            var state = {};
-            _.each(queries, function (query, statePropName) {
-                var cursor = store.query(query['query'], query['projection']);
-                if (query['sort']) {
-                    cursor.sort(query['sort']);
-                }
-
-                if (query['limit']) {
-                    cursor.limit(query['limit']);
-                }
-
-                if (query['skip']) {
-                    cursor.skip(query['skip']);
-                }
-
-                state[statePropName] = cursor.all();
-            });
-
-            self.setState(state);
-        };
     },
 
     unSubscribeFromStore(storeName){
@@ -177,6 +143,48 @@ export default {
         this._storeSubscriptions = {};
 
         return this;
+    },
+
+    _queryStore(store, queries){
+
+        var state = {};
+        _.each(queries, function (query, statePropName) {
+            var cursor = store.query(query['query'], query['projection']);
+            if (query['sort']) {
+                cursor.sort(query['sort']);
+            }
+
+            if (query['limit']) {
+                cursor.limit(query['limit']);
+            }
+
+            if (query['skip']) {
+                cursor.skip(query['skip']);
+            }
+
+            state[statePropName] = cursor.all();
+        });
+
+        return state;
+    },
+
+    _updateState(state){
+        this.setState(state);
+    },
+
+    _getListenerForStore(storeName){
+        var self = this;
+
+        return function () {
+            // this is to make sure we are still subscribed to store
+            if (!self.hasSubscribeToStore(storeName)) {
+                return;
+            }
+
+            var store = self._storeSubscriptions[storeName].store;
+            var queries = self._storeSubscriptions[storeName].queries;
+            self._updateState(self._queryStore(store, queries));
+        };
     }
 
 };
