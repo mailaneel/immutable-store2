@@ -81,7 +81,7 @@ export default {
                 throw new Error('store does not exist in flux ', storeName);
             }
 
-            self._storeSubscriptions[storeName] = self._getListenerForStore(storeQueries);
+            self._storeSubscriptions[storeName] = self._getListenerForStore(store, storeQueries);
             store.on('change', self._storeSubscriptions[storeName]);
         });
 
@@ -89,9 +89,9 @@ export default {
         return this;
     },
 
-    _getListenerForStore(queries){
+    _getListenerForStore(store, queries){
         var self = this;
-        return function(store){
+        return function(){
             _.each(queries, function(query, statePropName){
                 var state = {};
                 state[statePropName] = store.query(query);
