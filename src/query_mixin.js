@@ -81,7 +81,6 @@ export default {
     },
 
     subscribeToStores(queries){
-        this.unSubscribeFromStores();
 
         if (!queries) {
             return false;
@@ -89,6 +88,14 @@ export default {
 
         var self = this;
         var store;
+        var existingStoreSubscriptions = _.keys(this._storeSubscriptions);
+        var newStoresToSubscribe = _.keys(queries);
+        var removeSubscriptions = _.difference(existingStoreSubscriptions, newStoresToSubscribe);
+
+        _.each(removeSubscriptions, function (storeName) {
+            self.unSubscribeFromStore(storeName);
+        });
+
         _.each(queries, function (storeQueries, storeName) {
             store = self.getQueryableStores()[storeName];
 
@@ -96,42 +103,75 @@ export default {
                 throw new Error('store does not exist in flux ', storeName);
             }
 
-            self._storeSubscriptions[storeName] = self._getListenerForStore(store, storeQueries);
-            store.on('change', self._storeSubscriptions[storeName]);
+            if (self.hasSubscribeToStore(storeName)){
+                self._storeSubscriptions[storeName].queries = storeQueries;
+            }else{
+                self._storeSubscriptions[storeName] = {
+                    listener: self._getListenerForStore(storeName),
+                    queries: storeQueries,
+                    store: store
+                };
+            }
+
+            store.on('change', self._storeSubscriptions[storeName]['listener']);
         });
 
 
         return this;
     },
 
-    _getListenerForStore(store, queries){
+    hasSubscribeToStore(storeName){
+        return !!(this._storeSubscriptions[storeName]);
+    },
+
+    _getListenerForStore(storeName){
         var self = this;
-        return function(){
-            _.each(queries, function(query, statePropName){
+
+        return function () {
+
+            // this is to make sure we are still subscribed to store
+            if(!self.hasSubscribeToStore(storeName)){
+                return;
+            }
+
+            var store = self._storeSubscriptions[storeName].store;
+            var queries = self._storeSubscriptions[storeName].queries;
+
+            var state = {};
+            _.each(queries, function (query, statePropName) {
                 var cursor = store.query(query['query'], query['projection']);
-                if(query['sort']){
+                if (query['sort']) {
                     cursor.sort(query['sort']);
                 }
 
-                if(query['limit']){
+                if (query['limit']) {
                     cursor.limit(query['limit']);
                 }
 
-                if(query['skip']){
+                if (query['skip']) {
                     cursor.skip(query['skip']);
                 }
 
-                var state = {};
                 state[statePropName] = cursor.all();
-                self.setState(state);
             });
+
+            self.setState(state);
         };
+    },
+
+    unSubscribeFromStore(storeName){
+        if (this.hasSubscribeToStore(storeName)) {
+            this.getQueryableStores()[storeName].removeListener('change', this._storeSubscriptions[storeName].listener);
+            delete this._storeSubscriptions[storeName];
+        }
+
+        return this;
     },
 
     unSubscribeFromStores(){
         var self = this;
         _.each(this._storeSubscriptions, function (fn, storeName) {
-            self.getQueryableStores()[storeName].removeListener('change', fn);
+            self.unSubscribeFromStore(storeName);
         });
 
         this._storeSubscriptions = {};
