@@ -2,8 +2,7 @@ import _ from 'underscore';
 import EventEmitter from 'eventemitter3';
 import Immutable from 'seamless-immutable';
 import utils from './utils';
-import _Query from 'underscore-query';
-var _q = _Query(_, false);
+import Mingo from  'mingo';
 
 /**
  *
@@ -134,13 +133,25 @@ export default class Collection extends EventEmitter {
         return removed;
     }
 
-    query(q) {
-        return _q(this.data, q);
-    };
+    /**
+     * Runs a query and returns a cursor to the result
+     * @param criteria
+     * @param projection
+     * @returns {Mingo.Cursor}
+     */
+    query (criteria, projection) {
+        return Mingo.find(this.data, criteria, projection);
+    }
 
-    buildQuery() {
-        return _q.build(this.data);
-    };
+    /**
+     * Runs the given aggregation operators on this collection
+     * @params pipeline
+     * @returns {Array}
+     */
+    aggregate (pipeline) {
+        var args = [this.data, pipeline];
+        return Mingo.aggregate.apply(null, args);
+    }
 
     clear() {
         this.__clear();

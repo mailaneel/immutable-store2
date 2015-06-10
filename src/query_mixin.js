@@ -4,13 +4,22 @@ import _ from 'underscore';
 
 /**
  *
- * @see https://github.com/davidgtonge/underscore-query
+ * @see https://github.com/mailaneel/mingo
  *
  *
  * getStoreQueries(nextProps){
  *   return {
- *   'comments' : {
- *          'mostLiked': {likes: {$gt: 10000}}
+ *   comments : {
+ *          mostLiked: {
+ *             query: {
+ *                likes: {
+ *                  $gt: 10000
+ *               }
+ *             },
+ *             sort: {}
+ *             limit: 10,
+ *             skip: 0
+ *          }
  *       }
  *    }
  * }
@@ -18,7 +27,13 @@ import _ from 'underscore';
  * Example:
  * var _queries = {
  *       'storeName': {
- *           'statePropName': {} // query
+ *           // you can access this using this.state.statePropName
+ *           'statePropName': {
+ *              query: {},
+ *              sort: {},
+ *              limit: 10,
+ *              skip: 0
+ *           }
  *       }
  * };
  *
@@ -93,8 +108,21 @@ export default {
         var self = this;
         return function(){
             _.each(queries, function(query, statePropName){
+                var cursor = store.query(query['query'], query['projection']);
+                if(query['sort']){
+                    cursor.sort(query['sort']);
+                }
+
+                if(query['limit']){
+                    cursor.limit(query['limit']);
+                }
+
+                if(query['skip']){
+                    cursor.skip(query['skip']);
+                }
+
                 var state = {};
-                state[statePropName] = store.query(query);
+                state[statePropName] = cursor.all();
                 self.setState(state);
             });
         };
