@@ -41,8 +41,6 @@ import _ from 'underscore';
 
 export default {
 
-    _storeSubscriptions: {},
-
     contextTypes: {
         queryable_stores: React.PropTypes.object
     },
@@ -66,6 +64,8 @@ export default {
         if (!this['getStoreQueries']) {
             throw new Error('component should implement getStoreQueries');
         }
+
+        this._storeSubscriptions = {};
         this.subscribeToStores(this['getStoreQueries'](this.props));
     },
 
