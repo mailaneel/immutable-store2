@@ -27,17 +27,8 @@ console.log(comment === updatedComment) // logs false
 //queryable
 comments.query({likes: {$gt:4}}); // returns [{id:1, likes:5, cid: 'cid_1'}]
 
-// subscribe to this query
-var unsubscribe = comments.subscribeToQuery({likes: {$gt:4}}, function(data){
-   // collection will be queried and called with new data every time collection changes
-   // when subscribed first time it will query existing data 
-});
-
-// when component is unmounted or not needed any more
-unsubscribe();
-
 //events
-comments.on('change', function(collection){
+comments.on('change', function(comments){
 // triggers for every update, insert, remove
 });
 
@@ -55,7 +46,7 @@ comment.get('likes'); // returns 5
 comment.remove('likes');
 comment.clear();
 
-comment.on('change', function(){
+comment.on('change', function(comment){
 
 });
 
