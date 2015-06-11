@@ -122,7 +122,7 @@ describe('Collection', function () {
             collection.insert({likes: 4});
             collection.insert({likes: 3});
             collection.insert({likes: 2});
-            assert.equal(collection.query({likes: {$gt: 3}}).length, 2);
+            assert.equal(collection.query({likes: {$gt: 3}}).all().length, 2);
         });
     });
 
