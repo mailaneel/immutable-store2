@@ -27,8 +27,8 @@ import _ from 'underscore';
  * Example:
  * var _queries = {
  *       'storeName': {
- *           // you can access this using this.state.statePropName
- *           'statePropName': {
+ *           // you can access this using this.props.propName
+ *           'propName': {
  *              query: {},
  *              sort: {},
  *              limit: 10,
@@ -105,7 +105,7 @@ export default {
 
             if (self.hasSubscribeToStore(storeName)){
                 self._storeSubscriptions[storeName].queries = storeQueries;
-                self._updateState(self._queryStore(store, storeQueries));
+                self._updateProps(self._queryStore(store, storeQueries));
             }else{
                 self._storeSubscriptions[storeName] = {
                     listener: self._getListenerForStore(storeName),
@@ -147,8 +147,8 @@ export default {
 
     _queryStore(store, queries){
 
-        var state = {};
-        _.each(queries, function (query, statePropName) {
+        var props = {};
+        _.each(queries, function (query, propName) {
             var cursor = store.query(query['query'], query['projection']);
             if (query['sort']) {
                 cursor.sort(query['sort']);
@@ -162,14 +162,14 @@ export default {
                 cursor.skip(query['skip']);
             }
 
-            state[statePropName] = cursor.all();
+            props[propName] = cursor.all();
         });
 
-        return state;
+        return props;
     },
 
-    _updateState(state){
-        this.setState(state);
+    _updateProps(props){
+        this.setProps(props);
     },
 
     _getListenerForStore(storeName){
@@ -183,7 +183,7 @@ export default {
 
             var store = self._storeSubscriptions[storeName].store;
             var queries = self._storeSubscriptions[storeName].queries;
-            self._updateState(self._queryStore(store, queries));
+            self._updateProps(self._queryStore(store, queries));
         };
     }
 
