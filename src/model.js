@@ -49,7 +49,7 @@ export default class Model extends EventEmitter {
             attrs = key;
         }
 
-        var data = this.data.merge(attrs);
+        var data = this.data.merge(attrs, {deep: true});
 
         if(data !== this.data){
             this.data = data;
@@ -85,7 +85,7 @@ export default class Model extends EventEmitter {
     }
 
     toJSON(){
-        return this.data;
+        return this.data.asMutable({deep: true});
     }
 }
 

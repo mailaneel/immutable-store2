@@ -103,7 +103,7 @@ export default class Collection extends EventEmitter {
             return this.insert(doc);
         }
 
-        var newDoc = this.__update(existingDoc, existingDoc.merge(doc));
+        var newDoc = this.__update(existingDoc, existingDoc.merge(doc, {deep: true}));
 
         if (!Collection.isEqual(existingDoc, newDoc)) {
             this._updateIndex(newDoc);
@@ -202,7 +202,7 @@ export default class Collection extends EventEmitter {
     }
 
     toJSON() {
-        return this.data;
+        return _.map(this.data, (m) => m.asMutable({deep: true}));
     }
 
     __insert(doc) {
