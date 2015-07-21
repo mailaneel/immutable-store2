@@ -2,14 +2,11 @@
 
 ** under development **
 
-Allows Immutable, Local Storage, Queryable Collections
-
 #Collection
 
 ```js
-import {Model, Collection, LocalStorageAware} from 'immutable-store';
+import {Model, Collection} from 'immutable-store';
 
-@LocalStorageAware
 class Comments extend Collection{
 }
 
@@ -22,10 +19,6 @@ console.log(comment === updatedComment) // logs true
 
 updatedComment = comments.update(1, {likes: 5});
 console.log(comment === updatedComment) // logs false
-
-
-//queryable
-comments.query({likes: {$gt:4}}); // returns [{id:1, likes:5, cid: 'cid_1'}]
 
 //events
 comments.on('change', function(comments){
