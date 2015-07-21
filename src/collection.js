@@ -2,7 +2,6 @@ import _ from 'underscore';
 import EventEmitter from 'eventemitter3';
 import Immutable from 'seamless-immutable';
 import utils from './utils';
-import Mingo from  'mingo';
 
 /**
  *
@@ -131,26 +130,6 @@ export default class Collection extends EventEmitter {
         }
 
         return removed;
-    }
-
-    /**
-     * Runs a query and returns a cursor to the result
-     * @param criteria
-     * @param projection
-     * @returns {Mingo.Cursor}
-     */
-    query (criteria, projection) {
-        return Mingo.find(this.data, criteria, projection);
-    }
-
-    /**
-     * Runs the given aggregation operators on this collection
-     * @params pipeline
-     * @returns {Array}
-     */
-    aggregate (pipeline) {
-        var args = [this.data, pipeline];
-        return Mingo.aggregate.apply(null, args);
     }
 
     clear() {
