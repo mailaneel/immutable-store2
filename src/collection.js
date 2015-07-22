@@ -41,14 +41,9 @@ export default class Collection extends EventEmitter {
         this._isBufferingEvents = false;
         this._bufferTime = options.bufferTime;
 
-        // values of this key should be unique
-        this.indexKeys = [this.idAttribute, this.cidAttribute];
-        this.indexes = {};
-
         this.data = [];
-        this._ensureIndex();
 
-        if(data && _.isArray(data)){
+        if (data && _.isArray(data)) {
             _.each(data, _.bind(this.insert, this));
         }
     }
@@ -76,7 +71,6 @@ export default class Collection extends EventEmitter {
         }
 
         this.__insert(doc);
-        this._addIndex(doc);
         this._triggerChange();
         return doc
     }
@@ -105,7 +99,6 @@ export default class Collection extends EventEmitter {
         var newDoc = this.__update(existingDoc, existingDoc.merge(doc, {deep: true}));
 
         if (!Collection.isEqual(existingDoc, newDoc)) {
-            this._updateIndex(newDoc);
             this._triggerChange();
         }
 
@@ -125,7 +118,6 @@ export default class Collection extends EventEmitter {
 
         var removed = this.__remove(doc);
         if (removed) {
-            this._removeIndex(doc);
             this._triggerChange();
         }
 
@@ -150,22 +142,23 @@ export default class Collection extends EventEmitter {
      * @returns {boolean|{}} false if doc does not exist
      */
     get(id) {
-        var doc = false;
+        var where = {};
         if (!_.isObject(id)) {
             if (this.isCid(id)) {
-                doc = this.indexes[this.cidAttribute][id];
+                where[this.cidAttribute] = id;
             } else if (this.isId(id)) {
-                doc = this.indexes[this.idAttribute][id];
+                where[this.idAttribute] = id
             }
         } else {
             if (id[this.idAttribute]) {
-                doc = this.indexes[this.idAttribute][id[this.idAttribute]];
+                where[this.idAttribute] = id[this.idAttribute];
             } else if (id[this.cidAttribute]) {
-                doc = this.indexes[this.cidAttribute][id[this.cidAttribute]];
+                where[this.cidAttribute] = id[this.cidAttribute];
             }
         }
 
-        return doc;
+        var doc = (!_.isEmpty(where)) ? this.findWhere(where) : false;
+        return (doc) ? doc : false;
     }
 
     /**
@@ -212,71 +205,6 @@ export default class Collection extends EventEmitter {
 
     __clear() {
         this.data = [];
-        return this;
-    }
-
-    _ensureIndex() {
-        var self = this;
-        _.each(self.indexKeys, function (key) {
-            if (!self.indexes[key]) {
-                self.indexes[key] = {};
-            }
-        });
-
-
-        _.each(self.data, function (item) {
-            _.each(self.indexKeys, function (key) {
-                if (item[key]) {
-                    self.indexes[key][item[key]] = item;
-                }
-            });
-        });
-    }
-
-    /**
-     *
-     * @param {doc} doc
-     * @returns {Collection}
-     * @private
-     */
-    _updateIndex(doc) {
-        this._removeIndex(doc);
-        this._addIndex(doc);
-        return this;
-    }
-
-    /**
-     *
-     * @param {doc} doc
-     * @returns {Collection}
-     * @private
-     */
-    _addIndex(doc) {
-        var self = this;
-        _.each(self.indexKeys, function (key) {
-            if (!self.indexes[key]) {
-                self.indexes[key] = {};
-            }
-            self.indexes[key][doc[key]] = doc;
-        });
-
-        return this;
-    }
-
-    /**
-     *
-     * @param {doc} doc
-     * @returns {Collection}
-     * @private
-     */
-    _removeIndex(doc) {
-        var self = this;
-        _.each(self.indexKeys, function (key) {
-            if (self.indexes[key] && self.indexes[key][doc[key]]) {
-                delete self.indexes[key][doc[key]];
-            }
-        });
-
         return this;
     }
 

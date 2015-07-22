@@ -10,8 +10,6 @@ describe('Collection', function () {
             assert.equal(collection.cidPrefix, 'cid_');
             assert.isArray(collection.data);
             assert.equal(collection.data.length, 0);
-            assert.deepEqual(collection.indexKeys, ['id', 'cid']);
-            assert.isObject(collection.indexes);
         });
 
         it('should override options if given', function () {
@@ -129,5 +127,16 @@ describe('Collection', function () {
             collection._triggerChange();
         });
 
+    });
+
+    describe('#clear', function(){
+        it('should clear collection', function () {
+            var collection = new Collection();
+            collection.insert({id: 1, name: 'a'});
+            assert.equal(collection.count(), 1);
+            collection.clear();
+            assert.equal(collection.count(), 0);
+            assert.isFalse(collection.get(1));
+        });
     });
 });
