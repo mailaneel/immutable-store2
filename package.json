@@ -1,6 +1,6 @@
 {
   "name": "immutable-store2",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "wrapper around seamless immutable with local storage",
   "main": "index.js",
   "scripts": {
@@ -17,11 +17,9 @@
   },
   "homepage": "https://github.com/mailaneel/immutable-store2#readme",
   "dependencies": {
-    "babel-runtime": "^5.4.7",
-    "eventemitter3": "^1.1.0",
-    "react": "^0.13.3",
-    "seamless-immutable": "^2.3.2",
-    "store": "^1.3.17",
+    "babel-runtime": "^5.8.12",
+    "eventemitter3": "^1.1.1",
+    "seamless-immutable": "^2.4.2",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
