@@ -1,10 +1,10 @@
 {
   "name": "immutable-store2",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "wrapper around seamless immutable with local storage",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --reporter list --bail --check-leaks"
   },
   "repository": {
     "type": "git",
@@ -19,7 +19,7 @@
   "dependencies": {
     "babel-runtime": "^5.8.12",
     "eventemitter3": "^1.1.1",
-    "seamless-immutable": "^2.4.2",
+    "seamless-immutable": "^3.0.0",
     "underscore": "^1.8.3"
   },
   "devDependencies": {

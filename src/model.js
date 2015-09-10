@@ -17,8 +17,6 @@ export default class Model extends EventEmitter {
         this.idAttribute = options.idAttribute;
         this.cidAttribute = options.cidAttribute;
         this.cidPrefix = options.cidPrefix;
-
-
         this.data = Immutable(this._getDefaultData());
 
         if(attrs){
@@ -49,7 +47,7 @@ export default class Model extends EventEmitter {
             attrs = key;
         }
 
-        var data = this.data.merge(attrs, {deep: true});
+        var data = this.data.merge(attrs);
 
         if(data !== this.data){
             this.data = data;
@@ -60,7 +58,7 @@ export default class Model extends EventEmitter {
     }
 
     get(key){
-        return this.data[key];
+      return this.data[key];
     }
 
     remove(key) {

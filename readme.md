@@ -1,12 +1,9 @@
 #Immutable Store
 
-** under development **
-
 #Collection
 
 ```js
-import {Model, Collection} from 'immutable-store';
-
+import {Store, Model, Collection} from 'immutable-store';
 class Comments extend Collection{
 }
 
