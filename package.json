@@ -1,6 +1,6 @@
 {
   "name": "immutable-store2",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "wrapper around seamless immutable with local storage",
   "main": "index.js",
   "scripts": {
