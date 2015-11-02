@@ -2,6 +2,10 @@ var assert = require('chai').assert;
 var Collection = require('../lib/collection');
 var Immutable = require('immutable');
 
+function getItem(alphabet) {
+    return { id: alphabet, alphabet: alphabet };
+}
+
 describe('Collection', function () {
     describe('#instance', function () {
         it('should create a instance with default options', function () {
@@ -19,7 +23,7 @@ describe('Collection', function () {
         });
 
         it('should create collection with initial data if given', function () {
-            var collection = new Collection([{ id: 1, name: 'a' }]);
+            var collection = new Collection([getItem('a')]);
             assert.equal(collection.size, 1);
         });
 
@@ -28,61 +32,74 @@ describe('Collection', function () {
     describe('#find', function () {
         it('should return doc by id, cid, doc', function () {
             var collection = new Collection();
-            collection.add({ id: 1, name: 'a' });
-            assert.equal(collection.find(1).get('name'), 'a');
-            assert.equal(collection.find({ id: 1 }).get('name'), 'a');
-            // assert.isFalse(collection.find({}));
+            collection.add(getItem('a'));
+            assert.equal(collection.find('a').get('alphabet'), 'a');
+            assert.equal(collection.find({ id: 'a' }).get('alphabet'), 'a');
+            assert.isUndefined(collection.find({}));
+            assert.isUndefined(collection.find());
+            assert.isUndefined(collection.find(0));
         });
     });
 
     describe('#add', function () {
         it('should add object', function () {
             var collection = new Collection();
-            collection.add({ id: 1, name: 'a' });
-            assert.instanceOf(collection.find(1), Immutable.Map);
+            collection.add(getItem('a'));
+            assert.instanceOf(collection.find('a'), Immutable.Map);
             assert.equal(collection.size, 1);
         });
 
         it('should update object if it already exists', function () {
             var collection = new Collection();
-            collection.add({ id: 1, name: 'a' });
+            collection.add(getItem('a'));
             assert.equal(collection.size, 1);
-            collection.add({ id: 1, name: 'b' });
+            collection.add({ id: 'a', alphabet: 'a-updated' });
             assert.equal(collection.size, 1);
-            assert.equal(collection.find(1).get('name'), 'b');
+            assert.equal(collection.find('a').get('alphabet'), 'a-updated');
+        });
+
+        it('should be able to add array of items', function () {
+            var collection = new Collection();
+            collection.add([getItem('a'), getItem('b'), getItem('a')]);
+            
+            // it should update 3rd item instead of adding so we should have only 2 items in collection
+            assert.equal(collection.size, 2);
         });
     });
 
     describe('#update', function () {
         it('should update object by id or cid', function () {
             var collection = new Collection();
-            collection.add({ id: 1, name: 'a' });
+            collection.add(getItem('a'));
             assert.equal(collection.size, 1);
-            collection.update(1, { id: 1, name: 'b' });
+            collection.update('a', { alphabet: 'a-updated' });
             assert.equal(collection.size, 1);
-            assert.equal(collection.find(1).get('name'), 'b');
-
-            collection.update(1, { name: 'c' });
-            assert.equal(collection.size, 1);
-            assert.equal(collection.find(1).get('name'), 'c');
+            assert.equal(collection.find('a').get('alphabet'), 'a-updated');
         });
+
+        it('should update list of objects', function () {
+            var collection = new Collection([getItem('a'), getItem('b')]);
+            assert.equal(collection.size, 2);
+            collection.update([{ id: 'a', alphabet: 'a-updated' }, { id: 'b', alphabet: 'b-updated' }]);
+            assert.equal(collection.size, 2);
+            assert.equal(collection.find('a').get('alphabet'), 'a-updated');
+            assert.equal(collection.find('b').get('alphabet'), 'b-updated');
+        })
+
     });
 
     describe('#remove', function () {
         it('should remove object by id or cid or object', function () {
-            var collection = new Collection();
-            collection.add({ id: 1, name: 'a' });
-            collection.add({ id: 2, name: 'b' });
-            collection.add({ id: 3, name: 'c' });
+            var collection = new Collection([getItem('a'), getItem('b'), getItem('c')]);
             assert.equal(collection.size, 3);
 
-            collection.remove(1);
+            collection.remove('a');
             assert.equal(collection.size, 2);
 
-            collection.remove(collection.find(2));
+            collection.remove(collection.find('b'));
             assert.equal(collection.size, 1);
 
-            collection.remove(collection.find(3).get('cid'));
+            collection.remove(collection.find('c').get('cid'));
             assert.equal(collection.size, 0);
         });
     });
@@ -95,20 +112,36 @@ describe('Collection', function () {
                 done();
             });
 
-            collection.add({ id: 1 });
+            collection.add(getItem('a'));
         });
 
         it('should trigger change event only if there is a real change in data', function (done) {
             var collection = new Collection();
 
-            collection.on('change', function () {
-                done();
-            });
+            collection.on('change', done);
 
-            collection.add({ id: 1, name: 'a' });
-            collection.update(1, {name: 'a'})
+            collection.add(getItem('a'));
+            collection.update(1, { alphabet: 'a' })
         });
 
+        it('should trigger change event only once i.e use buffering', function (done) {
+            var collection = new Collection();
+
+            collection.on('change', done);
+
+            // all events are buffered for 1ms and and then triggered
+            // so done should only be called once
+            collection.add([getItem('a'), getItem('b')]);
+            collection.add(getItem('c'));
+        });
+
+    });
+
+    describe('#query', function () {
+        it('should export underlying data structure for advanced querying and filtering', function () {
+            var collection = new Collection();
+            assert.instanceOf(collection.query(), Immutable.List);
+        })
     });
 
     describe('#clear', function () {

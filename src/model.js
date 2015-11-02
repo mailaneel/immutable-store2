@@ -5,10 +5,7 @@ import Store from './store';
 
 class Model extends Store {
     constructor(state, options) {
-        super(state, options = defaults((options || {}), {
-            idAttribute: 'id',
-            cidAttribute: 'cid',
-            cidPrefix: 'cid_',
+        super(state, Object.assign((options || {}), {
             type: 'model'
         }));
     }

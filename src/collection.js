@@ -4,12 +4,10 @@ import uniqueId from 'lodash.uniqueid';
 import isObject from 'lodash.isobject';
 import Store from './store';
 
+
 class Collection extends Store {
     constructor(state, options) {
-        super(state, options = defaults((options || {}), {
-            idAttribute: 'id',
-            cidAttribute: 'cid',
-            cidPrefix: 'cid_',
+        super(state, Object.assign((options || {}), {
             type: 'collection'
         }));
     }
@@ -26,35 +24,65 @@ class Collection extends Store {
         }
 
         if (isObject(item)) {
-            return item.id | item.cid;
+            return item.id || item.cid;
         }
 
         return item;
     }
 
-    add(item) {        
+    _add(item) {
         if (this.has(item)) {
-            return this.update(this._getItemId(item), item);
+            return this._update(this._getItemId(item), item);
         }
-        
 
         item = this._prepareItem(item);
-        this.setState(this.state.push(Immutable.Map(item)));
+        this.setState(this.state.push(Immutable.fromJS(item)));
         return this;
     }
-   
+    
+    /**
+     * item or array or items can be given
+     * change will only be fired once
+     * 
+     * @param {{}|[{}]} items
+     */
+    add(items) {
+        if (Array.isArray(items)) {
+            items.forEach((item) => this._add(item));
+        } else {
+            this._add(items);
+        }
 
-    update(id, item) {
+        return this;
+    }
+
+    _update(id, item) {
         var index = this.findIndex(id);
         if (index === -1) {
-            return this.add(item);
+            return this._add(item);
         }
 
         let newState = this.state.update(index, (existingItem) => {
             return existingItem.mergeDeep(item);
         });
-        
+
         this.setState(newState);
+        return this;
+    }
+
+    update(id, item) {
+        if(arguments.length == 1){
+            if(Array.isArray(id)){
+                id.forEach((itemToUpdate) => this._update(itemToUpdate, itemToUpdate));
+            }else{
+                this._update(id, id);
+            }
+        }
+        
+        if(arguments.length == 2){
+            this._update(id, item);
+        }
+        
         return this;
     }
 
@@ -65,10 +93,12 @@ class Collection extends Store {
         }
 
         this.setState(this.state.remove(index));
+        return this;
     }
 
     clear() {
         this.setState(this.state.clear());
+        return this;
     }
 
     has(id) {
