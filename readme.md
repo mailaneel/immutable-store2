@@ -1,43 +1,56 @@
 #Immutable Store
 
+This branch is for updating store to immutable-js
+please see tests for usage
+
 #Collection
 
-```js
-import {Store, Model, Collection} from 'immutable-store';
-class Comments extend Collection{
-}
+```
+import {Collection} from 'immutable-store2';
 
-var comments = new Comments();
-var comment = comments.insert({id: 1, likes: 4});
-
-// immutable
-var updatedComment = comments.update(1, {likes: 4});
-console.log(comment === updatedComment) // logs true
-
-updatedComment = comments.update(1, {likes: 5});
-console.log(comment === updatedComment) // logs false
-
-//events
-comments.on('change', function(comments){
-// triggers for every update, insert, remove
+var collection = new Collection();
+collection.on('change', function(){
+	//change event
 });
+
+//triggers change event
+collection.add({id:1, comment: 'test comment', likes: 5});
+collection.find(1); // returns Immutable.Map of object
+
+//get likes 
+collection.find(1).get('likes'); // returns 5
+
+//update
+// triggers change event
+collection.update(1, {likes: 6});
+
+// update with same data will not trigger change
+collection.update(1, {likes: 6});
+
+//get access to underlying data structure => Immutable.List and you call any functions available on this
+collection.query(); // returns Immutable.List
+
+//get state
+collection.getState(); // returns Immutable.List 
+
+//remove => will trigger change event
+collection.remove(1); 
 
 ```
 
 #Model
 
-```js
-class Comment extends Model{
-}
+```
+import {Model} from 'immutable-store2';
 
-var comment = new Comment();
-comment.set({id:1, likes: 5});
-comment.get('likes'); // returns 5
-comment.remove('likes');
-comment.clear();
-
-comment.on('change', function(comment){
-
+var model = new Model();
+model.on('change', function(){
+	//change event
 });
 
+
+
 ```
+
+
+#In Progress
