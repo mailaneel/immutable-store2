@@ -52,5 +52,8 @@ model.on('change', function(){
 
 ```
 
-
 #In Progress
+
+- nested objects
+- comparing nested objects
+- more..
