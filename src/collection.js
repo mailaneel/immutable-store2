@@ -1,245 +1,100 @@
-import _ from 'underscore';
-import EventEmitter from 'eventemitter3';
-import Immutable from 'seamless-immutable';
-import utils from './utils';
+import defaults from 'lodash.defaults';
+import Immutable from 'immutable';
+import uniqueId from 'lodash.uniqueid';
+import isObject from 'lodash.isobject';
+import Store from './store';
 
-/**
- *
- * @typedef {string|number} id
- */
-
-/**
- * @typedef {string|number} cid
- */
-
-/**
- * @typedef {{}} doc
- */
-
-export default class Collection extends EventEmitter {
-
-    static isEqual(doc1, doc2) {
-        return doc1 === doc2;
-    }
-
-    constructor(data, options) {
-        super();
-        options = _.defaults((options || {}), {
+class Collection extends Store {
+    constructor(state, options) {
+        super(state, options = defaults((options || {}), {
             idAttribute: 'id',
             cidAttribute: 'cid',
             cidPrefix: 'cid_',
-            bufferTime: 1, //in ms,
-            name: _.uniqueId('collection_')
+            type: 'collection'
+        }));
+    }
+
+    _prepareItem(item) {
+        return defaults((item || {}), {
+            [this.cidAttribute]: uniqueId(this.cidPrefix),
         });
-
-        this.name = options.name;
-        this.idAttribute = options.idAttribute;
-        this.cidAttribute = options.cidAttribute;
-        this.cidPrefix = options.cidPrefix;
-
-        // we buffer events for predefined time instead of firing change events straight away
-        this._isBufferingEvents = false;
-        this._bufferTime = options.bufferTime;
-
-        this.data = [];
-
-        if (data && _.isArray(data)) {
-            _.each(data, _.bind(this.insert, this));
-        }
     }
 
-    /**
-     *
-     * @param {doc} doc
-     * @returns {*}
-     */
-    insert(doc) {
-        if (!_.isObject(doc)) {
-            throw new Error('doc must be object given ' + doc);
+    _getItemId(item) {
+        if (item instanceof Immutable.Map) {
+            return item.get(this.idAttribute) || item.get(this.cidAttribute);
         }
 
-        if (this.has(doc)) {
-            return this.update(doc);
+        if (isObject(item)) {
+            return item.id | item.cid;
         }
 
-        if (!doc[this.cidAttribute]) {
-            doc[this.cidAttribute] = _.uniqueId(this.cidPrefix);
+        return item;
+    }
+
+    add(item) {        
+        if (this.has(item)) {
+            return this.update(this._getItemId(item), item);
+        }
+        
+
+        item = this._prepareItem(item);
+        this.setState(this.state.push(Immutable.Map(item)));
+        return this;
+    }
+   
+
+    update(id, item) {
+        var index = this.findIndex(id);
+        if (index === -1) {
+            return this.add(item);
         }
 
-        if (!Immutable.isImmutable(doc)) {
-            doc = Immutable(doc);
-        }
-
-        this.__insert(doc);
-        this._triggerChange();
-        return doc
-    }
-
-    /**
-     *
-     * @param {id|cid|doc} id
-     * @param {doc} [doc]
-     * @returns {*}
-     */
-    update(id, doc) {
-
-        if (_.isObject(id)) {
-            doc = id;
-        }
-
-        if (!_.isObject(doc)) {
-            throw new Error('doc must be object given ' + doc)
-        }
-
-        var existingDoc = this.get(id);
-        if (!existingDoc) {
-            return this.insert(doc);
-        }
-
-        var newDoc = this.__update(existingDoc, existingDoc.merge(doc));
-
-        if (!Collection.isEqual(existingDoc, newDoc)) {
-            this._triggerChange();
-        }
-
-        return newDoc;
-    }
-
-    /**
-     *
-     * @param {id|cid|doc} doc
-     * @returns {boolean}
-     */
-    remove(doc) {
-        doc = this.get(doc);
-        if (!doc) {
-            return false;
-        }
-
-        var removed = this.__remove(doc);
-        if (removed) {
-            this._triggerChange();
-        }
-
-        return removed;
-    }
-
-    clear() {
-        this.__clear();
-        this._triggerChange();
-    }
-
-    isCid(id) {
-        return utils.isCid(id, this.cidPrefix);
-    }
-
-    isId(id) {
-        return utils.isId(id, this.cidPrefix);
-    }
-
-    /**
-     * @param {id|cid|doc} id
-     * @returns {boolean|{}} false if doc does not exist
-     */
-    get(id) {
-        var where = {};
-        if (!_.isObject(id)) {
-            if (this.isCid(id)) {
-                where[this.cidAttribute] = id;
-            } else if (this.isId(id)) {
-                where[this.idAttribute] = id
-            }
-        } else {
-            if (id[this.idAttribute]) {
-                where[this.idAttribute] = id[this.idAttribute];
-            } else if (id[this.cidAttribute]) {
-                where[this.cidAttribute] = id[this.cidAttribute];
-            }
-        }
-
-        var doc = (!_.isEmpty(where)) ? this.findWhere(where) : false;
-        return (doc) ? doc : false;
-    }
-
-    /**
-     * @param {id|cid|doc} doc
-     * @returns {boolean}
-     */
-    has(doc) {
-        return !(_.isEmpty(this.get(doc)));
-    }
-
-    count() {
-        return this.data.length;
-    }
-
-    toJSON() {
-        return _.map(this.data, (m) => m.asMutable());
-    }
-
-    __insert(doc) {
-        this.data.push(doc);
-        return doc;
-    }
-
-    __update(oldDoc, newDoc) {
-        if (!Collection.isEqual(oldDoc, newDoc)) {
-            var index = this.findIndex(oldDoc);
-            if (index !== -1) {
-                this.data[index] = newDoc;
-            }
-        }
-
-        return newDoc;
-    }
-
-    __remove(doc) {
-        var index = this.indexOf(doc);
-        if (index !== -1) {
-            this.data.splice(index, 1);
-            return true;
-        }
-
-        return false;
-    }
-
-    __clear() {
-        this.data = [];
+        let newState = this.state.update(index, (existingItem) => {
+            return existingItem.mergeDeep(item);
+        });
+        
+        this.setState(newState);
         return this;
     }
 
-    _triggerChange() {
-        if (!this._isBufferingEvents) {
-            this._isBufferingEvents = true;
-            var self = this;
-            setTimeout(function () {
-                self._isBufferingEvents = false;
-                self.emit('change', self);
-            }, this._bufferTime);
+    remove(id) {
+        var index = this.findIndex(id);
+        if (index === -1) {
+            return this;
         }
+
+        this.setState(this.state.remove(index));
     }
+
+    clear() {
+        this.setState(this.state.clear());
+    }
+
+    has(id) {
+        return !!(this.find(id))
+    }
+
+    get size() {
+        return this.state.size;
+    }
+
 }
 
-_.each([
-    'indexOf', 'lastIndexOf'
-], function (method) {
-    Collection.prototype[method] = function (object, ...rest) {
-        rest.unshift(this.data, this.get(object));
-        return _[method].apply(null, rest);
+//finders
+['find', 'findIndex'].forEach((method) => {
+    Collection.prototype[method] = function (id) {
+        id = this._getItemId(id);
+        return this.state[method]((item) => {
+            return (item.get(this.idAttribute) === id || item.get(this.cidAttribute) === id);
+        })
     }
 });
 
-_.each([
-    'each', 'map', 'reduce', 'reduceRight',
-    'find', 'filter', 'where', 'findWhere',
-    'reject', 'every', 'some', 'contains', 'invoke', 'pluck',
-    'max', 'min', 'sortBy', 'groupBy', 'indexBy', 'countBy', 'shuffle', 'sample',
-    'toArray', 'partition',
-    'first', 'initial', 'last', 'rest', 'findIndex', 'findLastIndex'
-], function (method) {
+['includes', 'contains', 'indexOf', 'toJS', 'toJSON', 'toArray', 'toObject'].forEach((method) => {
     Collection.prototype[method] = function (...rest) {
-        rest.unshift(this.data);
-        return _[method].apply(null, rest);
-
+        return this.state[method].apply(this.state, rest);
     }
 });
+
+export default Collection;

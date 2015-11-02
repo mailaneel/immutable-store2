@@ -19,8 +19,10 @@
   "dependencies": {
     "babel-runtime": "^5.8.12",
     "eventemitter3": "^1.1.1",
-    "seamless-immutable": "^3.0.0",
-    "underscore": "^1.8.3"
+    "immutable": "^3.7.5",
+    "lodash.defaults": "^3.1.2",
+    "lodash.isobject": "^3.0.2",
+    "lodash.uniqueid": "^3.0.0"
   },
   "devDependencies": {
     "chai": "^2.3.0",

@@ -1,4 +1,6 @@
+var _ = require('lodash');
 module.exports = {
-    Collection: require('./lib/collection'), // only use this for dev or extension
+    Store: require('./lib/store'),
+    Collection: require('./lib/collection'),
     Model: require('./lib/model')
 };
