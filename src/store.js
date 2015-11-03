@@ -1,6 +1,7 @@
 import Immutable from 'immutable';
 import EventEmitter from 'eventemitter3';
 import uniqueId from 'lodash.uniqueid';
+import isObject from 'lodash.isObject';
 import defaults from 'lodash.defaults';
 
 export default class Store extends EventEmitter {
@@ -24,8 +25,20 @@ export default class Store extends EventEmitter {
         this._isBufferingEvents = false;
         this._bufferTime = options.bufferTime;
 		
+		state = (state && isObject(state) && state['toJSON'])? state.toJSON(): state;
 		this.state = Immutable.fromJS((state) ? state : ((this.type == 'collection') ? [] : {}));
 	}
+	
+	/**
+	 * This is to avoid setting mutable objects in immutable structure
+	 * Ex: {a: {b: Immutable.Map({a: 1}), c: 1}}
+	 * 
+	 */
+	_deepConvert(val){
+		val = Immutable.fromJS(val);
+		return (isObject(val) && val['toJSON'])? Immutable.fromJS(val.toJSON()) : val;
+	}
+	
 	emitChange() {
 		if (!this._isBufferingEvents) {
             this._isBufferingEvents = true;

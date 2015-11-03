@@ -12,8 +12,8 @@ var testNestedData = {
     }
 };
 
-function getItem(alphabet){
-    return {id: alphabet, alphabet: alphabet};
+function getItem(alphabet) {
+    return { id: alphabet, alphabet: alphabet };
 }
 
 describe('Model', function () {
@@ -59,6 +59,60 @@ describe('Model', function () {
             var model = new Model(testNestedData);
             model.setIn(['level1', 'level2', 'level3', 'value'], 2);
             assert.equal(model.getIn(['level1', 'level2', 'level3', 'value']), 2);
+            assert.instanceOf(model.getIn(['level1', 'level2']), Immutable.Map)
+            
+            
+        });
+        
+        it('should convert object to Map', function(){
+            var model = new Model(testNestedData);
+            // setIn should convert object to Map => uses fromJS for conversion
+            model.setIn(['level1', 'level2'], { level3: 3 });
+            assert.instanceOf(model.getIn(['level1', 'level2']), Immutable.Map)
+            assert.equal(model.getIn(['level1', 'level2', 'level3']), 3)
+        })
+    });
+
+    describe('#update', function () {
+        it('should update value', function () {
+            var model = new Model(getItem('a'));
+            assert.equal(model.get('alphabet'), 'a');
+            model.update('alphabet', function(val){
+                return 'a-updated';
+            });
+            assert.equal(model.get('alphabet'), 'a-updated');
+        });
+        
+        it('should not update state if there is no change', function () {
+            var model = new Model(getItem('a'));
+            assert.equal(model.get('alphabet'), 'a');
+            var state = model.getState();
+            model.update('alphabet', function(val){
+                return 'a';
+            });
+            assert.equal(model.get('alphabet'), 'a');
+            assert.deepEqual(state, model.getState());
+        });
+    });
+
+    describe('#updateIn', function () {
+        it('should update nested value', function () {
+            var model = new Model(testNestedData);
+            
+            model.updateIn(['level1', 'level2'], function(val){
+                // if return value is plain object it will be converted deep Immutable Map
+                return {level3: 2}
+            });
+            
+            assert.instanceOf(model.getIn(['level1', 'level2']), Immutable.Map)
+            assert.equal(model.getIn(['level1', 'level2', 'level3']), 2)
+            
+             model.updateIn(['level1', 'level2'], function(val){
+                return val.set('level3', 3)
+            });
+            
+            assert.instanceOf(model.getIn(['level1', 'level2']), Immutable.Map)
+            assert.equal(model.getIn(['level1', 'level2', 'level3']), 3)
         });
     });
 
@@ -96,19 +150,19 @@ describe('Model', function () {
             assert.isUndefined(model.get('id'));
         });
     });
-    
-    describe('#query', function(){
-       it('should export underlying data structure for advanced querying and filtering', function(){
-           var model = new Model();
-           assert.instanceOf(model.query(), Immutable.Map);
-       }) 
+
+    describe('#query', function () {
+        it('should export underlying data structure for advanced querying and filtering', function () {
+            var model = new Model();
+            assert.instanceOf(model.query(), Immutable.Map);
+        })
     });
 
     describe('#event-change', function () {
         it('should trigger change event', function (done) {
             var model = new Model();
             model.on('change', done);
-            model.set('alphabet', 'a');      
+            model.set('alphabet', 'a');
         });
 
         it('should trigger change event only if there is a real change in data', function (done) {
@@ -119,8 +173,7 @@ describe('Model', function () {
             //change will be triggered once because there is no real change
             model.set('alphabet', 'a');
         });
-        
-        
+
         it('should trigger change event only once i.e use buffering', function (done) {
             var model = new Model();
 

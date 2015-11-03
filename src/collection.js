@@ -13,6 +13,10 @@ class Collection extends Store {
     }
 
     _prepareItem(item) {
+        if(item instanceof Immutable.Map){
+            return (!item.has(this.cidAttribute))? item.set(this.cidAttribute, uniqueId(this.cidPrefix)) : item;
+        }
+        
         return defaults((item || {}), {
             [this.cidAttribute]: uniqueId(this.cidPrefix),
         });
@@ -28,7 +32,7 @@ class Collection extends Store {
         }
 
         return item;
-    }
+    }    
 
     _add(item) {
         if (this.has(item)) {
@@ -36,7 +40,7 @@ class Collection extends Store {
         }
 
         item = this._prepareItem(item);
-        this.setState(this.state.push(Immutable.fromJS(item)));
+        this.setState(this.state.push(this._deepConvert(item)));
         return this;
     }
     
@@ -61,9 +65,9 @@ class Collection extends Store {
         if (index === -1) {
             return this._add(item);
         }
-
+        
         let newState = this.state.update(index, (existingItem) => {
-            return existingItem.mergeDeep(item);
+            return this._deepConvert(existingItem.mergeDeep(item));
         });
 
         this.setState(newState);
@@ -108,7 +112,10 @@ class Collection extends Store {
     get size() {
         return this.state.size;
     }
-
+    
+    mutate(cb){
+      this.setState(this.state.withMutations(cb)) 
+    }
 }
 
 //finders
