@@ -1,5 +1,5 @@
-import defaults from 'lodash.defaults';
 import Immutable from 'immutable';
+import defaults from 'lodash.defaults';
 import uniqueId from 'lodash.uniqueid';
 import isObject from 'lodash.isobject';
 import Store from './store';

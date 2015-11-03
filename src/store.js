@@ -64,7 +64,13 @@ export default class Store extends EventEmitter {
 		return this.state;
 	}
 	
-	// get access to underlying data structure
+	/**
+	 * get access to underlying data structure either Immutable.List or Immutable.Map
+	 * 
+	 * Example:
+	 * var collection = new Collection();
+	 * var list = collection.query();
+	 */
 	query(){
 		return this.state;
 	}

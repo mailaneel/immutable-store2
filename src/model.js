@@ -1,6 +1,5 @@
-import defaults from 'lodash.defaults';
-import EventEmitter from 'eventemitter3';
 import Immutable from 'immutable';
+import defaults from 'lodash.defaults';
 import Store from './store';
 
 class Model extends Store {

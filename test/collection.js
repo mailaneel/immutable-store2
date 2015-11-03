@@ -6,6 +6,7 @@ function getItem(alphabet) {
     return { id: alphabet, alphabet: alphabet };
 }
 
+//TODO refactor tests once api is stable
 describe('Collection', function () {
     describe('#instance', function () {
         it('should create a instance with default options', function () {
@@ -66,6 +67,13 @@ describe('Collection', function () {
             // it should update 3rd item instead of adding so we should have only 2 items in collection
             assert.equal(collection.size, 2);
         });
+
+        it('should be able to add nested object', function () {
+            var collection = new Collection();
+            collection.add({ id: 1, a: 1, b: { c: Immutable.Map({ d: 1 }) } });
+            assert.equal(collection.size, 1);
+            assert.equal(collection.find(1).getIn(['b', 'c', 'd']), 1);
+        });
     });
 
     describe('#update', function () {
@@ -85,7 +93,26 @@ describe('Collection', function () {
             assert.equal(collection.size, 2);
             assert.equal(collection.find('a').get('alphabet'), 'a-updated');
             assert.equal(collection.find('b').get('alphabet'), 'b-updated');
-        })
+        });
+
+        it('should be able to update nested object', function () {
+            var collection = new Collection();
+            collection.add({ id: 1, a: 1, b: { c: Immutable.Map({ d: 1 }) } });
+            assert.equal(collection.size, 1);
+            assert.equal(collection.find(1).getIn(['b', 'c', 'd']), 1);
+            collection.update(1, { b: { c: { d: 2 } } });
+            assert.equal(collection.find(1).getIn(['b', 'c', 'd']), 2);
+        });
+
+        it('should not update state if no changes occur', function () {
+            var collection = new Collection();
+            collection.add({ id: 1, a: 1, b: { c: Immutable.Map({ d: 1 }) } });
+            var oldState = collection.getState();
+            collection.update(1, { b: { c: { d: 1 } } });
+            assert.deepEqual(oldState, collection.getState());
+            collection.update(1, Immutable.Map({ b: { c: { d: 1 } } }));
+            assert.deepEqual(oldState, collection.getState());
+        });
 
     });
 
