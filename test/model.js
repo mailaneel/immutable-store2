@@ -23,6 +23,7 @@ describe('Model', function () {
             assert.equal(model.idAttribute, 'id');
             assert.equal(model.cidAttribute, 'cid');
             assert.equal(model.cidPrefix, 'cid_');
+            assert.equal(model._bufferTime, 0);
             assert.isObject(model.state);
             assert.instanceOf(model.state, Immutable.Map);
         });
@@ -40,17 +41,18 @@ describe('Model', function () {
 
 
     describe('#set', function () {
-        it('should set val by key', function () {
+        it('should set value by key', function () {
             var model = new Model();
             model.set('id', 1);
             assert.equal(model.get('id'), 1);
+            model.set('id', 2);
+            assert.equal(model.get('id'), 2);
         });
 
-        it('should update value if key already exists', function () {
-            var model = new Model(getItem('a'));
-            assert.equal(model.get('alphabet'), 'a');
-            model.set('alphabet', 'a-updated');
-            assert.equal(model.get('alphabet'), 'a-updated');
+        it('should convert value deeply to immutable', function () {
+            var model = new Model();
+            model.set('a', { b: { c: Immutable.Map({ d: 1 }) } });
+            assert.equal(model.getIn(['a', 'b', 'c', 'd']), 1);
         });
     });
 
@@ -60,34 +62,30 @@ describe('Model', function () {
             model.setIn(['level1', 'level2', 'level3', 'value'], 2);
             assert.equal(model.getIn(['level1', 'level2', 'level3', 'value']), 2);
             assert.instanceOf(model.getIn(['level1', 'level2']), Immutable.Map)
-            
-            
         });
-        
-        it('should convert object to Map', function(){
-            var model = new Model(testNestedData);
-            // setIn should convert object to Map => uses fromJS for conversion
-            model.setIn(['level1', 'level2'], { level3: 3 });
-            assert.instanceOf(model.getIn(['level1', 'level2']), Immutable.Map)
-            assert.equal(model.getIn(['level1', 'level2', 'level3']), 3)
-        })
+
+        it('should convert value deeply to immutable', function () {
+            var model = new Model();
+            model.setIn(['a'], { b: { c: Immutable.Map({ d: 1 }) } });
+            assert.equal(model.getIn(['a', 'b', 'c', 'd']), 1);
+        });
     });
 
     describe('#update', function () {
         it('should update value', function () {
             var model = new Model(getItem('a'));
             assert.equal(model.get('alphabet'), 'a');
-            model.update('alphabet', function(val){
+            model.update('alphabet', function (val) {
                 return 'a-updated';
             });
             assert.equal(model.get('alphabet'), 'a-updated');
         });
-        
+
         it('should not update state if there is no change', function () {
             var model = new Model(getItem('a'));
             assert.equal(model.get('alphabet'), 'a');
             var state = model.getState();
-            model.update('alphabet', function(val){
+            model.update('alphabet', function (val) {
                 return 'a';
             });
             assert.equal(model.get('alphabet'), 'a');
@@ -98,19 +96,19 @@ describe('Model', function () {
     describe('#updateIn', function () {
         it('should update nested value', function () {
             var model = new Model(testNestedData);
-            
-            model.updateIn(['level1', 'level2'], function(val){
+
+            model.updateIn(['level1', 'level2'], function (val) {
                 // if return value is plain object it will be converted deep Immutable Map
-                return {level3: 2}
+                return { level3: 2 }
             });
-            
+
             assert.instanceOf(model.getIn(['level1', 'level2']), Immutable.Map)
             assert.equal(model.getIn(['level1', 'level2', 'level3']), 2)
-            
-             model.updateIn(['level1', 'level2'], function(val){
+
+            model.updateIn(['level1', 'level2'], function (val) {
                 return val.set('level3', 3)
             });
-            
+
             assert.instanceOf(model.getIn(['level1', 'level2']), Immutable.Map)
             assert.equal(model.getIn(['level1', 'level2', 'level3']), 3)
         });
@@ -186,5 +184,23 @@ describe('Model', function () {
             model.emitChange();
             model.emitChange();
         });
+    });
+
+
+    describe("#usecases", function () {
+        it('should convert value deeply to immutable ', function () {
+            var model = new Model({
+                a: 1,
+                b: {
+                    c: 1
+                }
+            });
+            assert.equal(model.getIn(['b', 'c']), 1);
+
+            var oldState = model.getState();
+            model.merge({ b: Immutable.Map({ c: 1 }) }  );
+            assert.equal(model.getIn(['b', 'c']), 1);
+            assert.deepEqual(oldState, model.getState())
+        })
     });
 });

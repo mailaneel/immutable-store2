@@ -56,4 +56,5 @@ model.on('change', function(){
 
 - nested objects
 - comparing nested objects
+- tests
 - more..

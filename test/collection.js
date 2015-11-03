@@ -13,6 +13,7 @@ describe('Collection', function () {
             assert.equal(collection.idAttribute, 'id');
             assert.equal(collection.cidAttribute, 'cid');
             assert.equal(collection.cidPrefix, 'cid_');
+            assert.equal(collection._bufferTime, 0);
             assert.instanceOf(collection.state, Immutable.List);
             assert.equal(collection.size, 0);
         });

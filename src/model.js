@@ -1,7 +1,6 @@
 import defaults from 'lodash.defaults';
 import EventEmitter from 'eventemitter3';
 import Immutable from 'immutable';
-import isObject from 'lodash.isobject';
 import Store from './store';
 
 class Model extends Store {
@@ -21,20 +20,30 @@ class Model extends Store {
 }
 
 // persistant changes
-['set', 'setIn', 'merge', 'mergeIn', 'mergeDeep', 'mergeDeepIn'].forEach((method) => {
-    Model.prototype[method] = function (key, val) {       
+[
+    'set',
+    'setIn',
+    'merge',
+    'mergeIn',
+    'mergeDeep',
+    'mergeDeepIn'
+].forEach((method) => {
+    Model.prototype[method] = function (key, val) {
         this.setState(this.state[method].apply(this.state, [key, this._deepConvert(val)]));
         return this;
     }
 });
 
 // persistant changes
-['update', 'updateIn'].forEach((method) => {
+[
+    'update',
+    'updateIn'
+].forEach((method) => {
     Model.prototype[method] = function (...args) {
-        
+
         var self = this;
         function wrap(fn) {
-            return function (val) {    
+            return function (val) {
                 return self._deepConvert(fn(val));
             }
         }

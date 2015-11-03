@@ -13,10 +13,10 @@ class Collection extends Store {
     }
 
     _prepareItem(item) {
-        if(item instanceof Immutable.Map){
-            return (!item.has(this.cidAttribute))? item.set(this.cidAttribute, uniqueId(this.cidPrefix)) : item;
+        if (item instanceof Immutable.Map) {
+            return (!item.has(this.cidAttribute)) ? item.set(this.cidAttribute, uniqueId(this.cidPrefix)) : item;
         }
-        
+
         return defaults((item || {}), {
             [this.cidAttribute]: uniqueId(this.cidPrefix),
         });
@@ -32,7 +32,7 @@ class Collection extends Store {
         }
 
         return item;
-    }    
+    }
 
     _add(item) {
         if (this.has(item)) {
@@ -65,9 +65,9 @@ class Collection extends Store {
         if (index === -1) {
             return this._add(item);
         }
-        
+
         let newState = this.state.update(index, (existingItem) => {
-            return this._deepConvert(existingItem.mergeDeep(item));
+            return existingItem.mergeDeep(this._deepConvert(item));
         });
 
         this.setState(newState);
@@ -75,18 +75,18 @@ class Collection extends Store {
     }
 
     update(id, item) {
-        if(arguments.length == 1){
-            if(Array.isArray(id)){
+        if (arguments.length == 1) {
+            if (Array.isArray(id)) {
                 id.forEach((itemToUpdate) => this._update(itemToUpdate, itemToUpdate));
-            }else{
+            } else {
                 this._update(id, id);
             }
         }
-        
-        if(arguments.length == 2){
+
+        if (arguments.length == 2) {
             this._update(id, item);
         }
-        
+
         return this;
     }
 
@@ -112,14 +112,17 @@ class Collection extends Store {
     get size() {
         return this.state.size;
     }
-    
-    mutate(cb){
-      this.setState(this.state.withMutations(cb)) 
+
+    mutate(cb) {
+        this.setState(this.state.withMutations(cb))
     }
 }
 
 //finders
-['find', 'findIndex'].forEach((method) => {
+[
+    'find',
+    'findIndex'
+].forEach((method) => {
     Collection.prototype[method] = function (id) {
         id = this._getItemId(id);
         return this.state[method]((item) => {
@@ -128,7 +131,15 @@ class Collection extends Store {
     }
 });
 
-['includes', 'contains', 'indexOf', 'toJS', 'toJSON', 'toArray', 'toObject'].forEach((method) => {
+[
+    'includes',
+    'contains',
+    'indexOf',
+    'toJS',
+    'toJSON',
+    'toArray',
+    'toObject'
+].forEach((method) => {
     Collection.prototype[method] = function (...rest) {
         return this.state[method].apply(this.state, rest);
     }
