@@ -8,11 +8,17 @@ class Model extends Store {
             type: 'model'
         }));
     }
-
+    
+    /**
+     * @returns {[]} array of keys
+     */
     keys() {
         return this.state.keySeq().toJS();
     }
-
+    
+    /**
+     * @returns {[]} array of values
+     */
     values() {
         return this.state.valueSeq().toJS();
     }

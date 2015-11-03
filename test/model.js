@@ -16,6 +16,8 @@ function getItem(alphabet) {
     return { id: alphabet, alphabet: alphabet };
 }
 
+//TODO refactor tests once api is stable
+
 describe('Model', function () {
     describe('#instance', function () {
         it('should create a instance with default options', function () {
@@ -149,10 +151,10 @@ describe('Model', function () {
         });
     });
 
-    describe('#query', function () {
-        it('should export underlying data structure for advanced querying and filtering', function () {
+    describe('#getState', function () {
+        it('should get underlying data structure for advanced querying and filtering', function () {
             var model = new Model();
-            assert.instanceOf(model.query(), Immutable.Map);
+            assert.instanceOf(model.getState(), Immutable.Map);
         })
     });
 

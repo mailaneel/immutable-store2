@@ -4,7 +4,6 @@ import uniqueId from 'lodash.uniqueid';
 import isObject from 'lodash.isobject';
 import Store from './store';
 
-
 class Collection extends Store {
     constructor(state, options) {
         super(state, Object.assign((options || {}), {
@@ -24,6 +23,7 @@ class Collection extends Store {
 
     _getItemId(item) {
         if (item instanceof Immutable.Map) {
+            //check if we have id first and then client id
             return item.get(this.idAttribute) || item.get(this.cidAttribute);
         }
 
@@ -73,7 +73,12 @@ class Collection extends Store {
         this.setState(newState);
         return this;
     }
-
+    
+    /**
+     * 
+     * @param {{}|[{}]|string|number} id if given item or list of items second parameter is optional, if id of item is given second parameter is required
+     * @param {{}} [item] item to update
+     */
     update(id, item) {
         if (arguments.length == 1) {
             if (Array.isArray(id)) {
@@ -90,6 +95,9 @@ class Collection extends Store {
         return this;
     }
 
+    /**
+     * @param {string|number|{}} id
+     */
     remove(id) {
         var index = this.findIndex(id);
         if (index === -1) {
@@ -105,17 +113,21 @@ class Collection extends Store {
         return this;
     }
 
+    /**
+     * @param {string|number|{}} id
+     * @returns {boolean}
+     */
     has(id) {
         return !!(this.find(id))
     }
 
+    /**
+     * @returns {number} size of collection
+     */
     get size() {
         return this.state.size;
     }
 
-    mutate(cb) {
-        this.setState(this.state.withMutations(cb))
-    }
 }
 
 //finders
@@ -131,6 +143,7 @@ class Collection extends Store {
     }
 });
 
+//getters
 [
     'includes',
     'contains',

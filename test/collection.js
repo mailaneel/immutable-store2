@@ -165,10 +165,10 @@ describe('Collection', function () {
 
     });
 
-    describe('#query', function () {
-        it('should export underlying data structure for advanced querying and filtering', function () {
+    describe('#getState', function () {
+        it('should get underlying data structure for advanced querying and filtering', function () {
             var collection = new Collection();
-            assert.instanceOf(collection.query(), Immutable.List);
+            assert.instanceOf(collection.getState(), Immutable.List);
         })
     });
 
