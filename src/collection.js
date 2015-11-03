@@ -51,6 +51,11 @@ class Collection extends Store {
      * @param {{}|[{}]} items
      */
     add(items) {
+        
+        if(items instanceof Immutable.List){
+            items = items.toArray();
+        }
+        
         if (Array.isArray(items)) {
             items.forEach((item) => this._add(item));
         } else {
