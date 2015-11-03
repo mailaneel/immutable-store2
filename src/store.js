@@ -1,7 +1,7 @@
 import Immutable from 'immutable';
 import EventEmitter from 'eventemitter3';
 import uniqueId from 'lodash.uniqueid';
-import isObject from 'lodash.isObject';
+import isObject from 'lodash.isobject';
 import defaults from 'lodash.defaults';
 
 export default class Store extends EventEmitter {
