@@ -28,7 +28,7 @@ class Collection extends Store {
         }
 
         if (isObject(item)) {
-            return item.id || item.cid;
+            return item[this.idAttribute] || item[this.cidAttribute];
         }
 
         return item;
