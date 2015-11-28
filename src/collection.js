@@ -81,7 +81,8 @@ class Collection extends Store {
     
     /**
      * 
-     * @param {{}|[{}]|string|number} id if given item or list of items second parameter is optional, if id of item is given second parameter is required
+     * @param {{}|[{}]|string|number} id if given item or list of items second parameter is optional, 
+     * if id of item is given second parameter is required
      * @param {{}} [item] item to update
      */
     update(id, item) {
