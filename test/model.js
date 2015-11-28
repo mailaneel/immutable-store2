@@ -200,7 +200,7 @@ describe('Model', function () {
             assert.equal(model.getIn(['b', 'c']), 1);
 
             var oldState = model.getState();
-            model.merge({ b: Immutable.Map({ c: 1 }) }  );
+            model.merge({ b: Immutable.Map({ c: 1 }) });
             assert.equal(model.getIn(['b', 'c']), 1);
             assert.deepEqual(oldState, model.getState())
         })

@@ -14,19 +14,19 @@ export default class Store extends EventEmitter {
 			bufferTime: 0, // in ms
 			name: uniqueId(options.type + '_')
         });
-		
-		this.name = options.name ;
+
+		this.name = options.name;
 		this.type = options.type; // collection || model
 		
-		if(!this.type || ['collection', 'model'].indexOf(this.type) === -1){
+		if (!this.type || ['collection', 'model'].indexOf(this.type) === -1) {
 			throw new Error('type property is required in options. supported values are collection, model');
 		}
-		
+
 		this.idAttribute = options.idAttribute;
         this.cidAttribute = options.cidAttribute;
         this.cidPrefix = options.cidPrefix;
 		
-	    // we buffer events for predefined time instead of firing change events straight away
+		// we buffer events for predefined time instead of firing change events straight away
         this._isBufferingEvents = false;
         this._bufferTime = options.bufferTime;
 
@@ -38,20 +38,20 @@ export default class Store extends EventEmitter {
 	 * Ex: {a: {b: Immutable.Map({a: 1}), c: 1}}
 	 * 
 	 */
-	_deepConvert(val){
+	_deepConvert(val) {
 		val = Immutable.fromJS(val);
-		return (isObject(val) && val['toJSON'])? Immutable.fromJS(val.toJSON()) : val;
+		return (isObject(val) && val['toJSON']) ? Immutable.fromJS(val.toJSON()) : val;
 	}
-	
+
 	emitChange() {
 		if (!this._isBufferingEvents) {
             this._isBufferingEvents = true;
-            setTimeout( () => {
+            setTimeout(() => {
                 this._isBufferingEvents = false;
                 this.emit('change');
             }, this._bufferTime);
         }
-		
+
 		return this;
 	}
 
@@ -73,5 +73,5 @@ export default class Store extends EventEmitter {
 	 */
 	getState() {
 		return this.state;
-	}	
+	}
 }
