@@ -1,5 +1,5 @@
 import Immutable from 'immutable';
-import _ from 'lodash';
+import isObject from 'lodash/lang/isObject';
 
 export function deepConvert(val) {
 	val = Immutable.fromJS(val);
