@@ -1,7 +1,5 @@
 import Immutable from 'immutable';
-import defaults from 'lodash.defaults';
-import uniqueId from 'lodash.uniqueid';
-import isObject from 'lodash.isobject';
+import _ from 'lodash';
 import {deepConvert} from './utils';
 
 const ID_ATTRIBUTE = 'id';
@@ -23,7 +21,7 @@ function _getItemId(item) {
 		return item.get(ID_ATTRIBUTE) || item.get(CID_ATTRIBUTE);
 	}
 
-	if (isObject(item)) {
+	if (_.isObject(item)) {
 		return item[ID_ATTRIBUTE] || item[CID_ATTRIBUTE];
 	}
 
@@ -33,12 +31,12 @@ function _getItemId(item) {
 function _prepareItem(item) {
 	if (item instanceof Immutable.Map) {
 		return (!item.has(CID_ATTRIBUTE)) ?
-			item.set(CID_ATTRIBUTE, uniqueId(CID_PREFIX))
+			item.set(CID_ATTRIBUTE, _.uniqueId(CID_PREFIX))
 			: item;
 	}
 
-	return defaults((item || {}), {
-		[CID_ATTRIBUTE]: uniqueId(CID_PREFIX),
+	return _.defaults((item || {}), {
+		[CID_ATTRIBUTE]: _.uniqueId(CID_PREFIX),
 	});
 };
 

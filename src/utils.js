@@ -1,7 +1,7 @@
 import Immutable from 'immutable';
-import isObject from 'lodash.isobject';
+import _ from 'lodash';
 
 export function deepConvert(val) {
 	val = Immutable.fromJS(val);
-	return (isObject(val) && val['toJSON']) ? Immutable.fromJS(val.toJSON()) : val;
+	return (_.isObject(val) && val['toJSON']) ? Immutable.fromJS(val.toJSON()) : val;
 }
