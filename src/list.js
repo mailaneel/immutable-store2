@@ -43,6 +43,11 @@ function _prepareItem(item) {
 };
 
 function _addOne(list, item) {
+
+	if (!item) {
+		return list;
+	}
+
 	if (has(list, item)) {
 		return _updateOne(list, item, item);
 	}

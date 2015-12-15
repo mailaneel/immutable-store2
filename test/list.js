@@ -60,6 +60,12 @@ describe('Collection', function () {
             assert.instanceOf(find(list, 'a'), Immutable.Map);
             assert.equal(list.size, 1);
         });
+        
+        it('should not add if object is null or undefined', function () {
+            var list = new Immutable.List();
+            list = add(list, null);
+            assert.equal(list.size, 0);
+        });
 
         it('should update object if it already exists', function () {
             var list = new Immutable.List();
