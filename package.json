@@ -1,6 +1,6 @@
 {
   "name": "immutable-store2",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "wrapper around seamless immutable with local storage",
   "main": "index.js",
   "scripts": {
@@ -31,6 +31,6 @@
   },
   "peerDependencies": {
     "immutable": "^3.7.6",
-    "lodash": "3^3.10.1"
+    "lodash": "^3.10.1"
   }
 }
