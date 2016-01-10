@@ -1,6 +1,6 @@
 {
   "name": "immutable-store2",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "wrapper around seamless immutable with local storage",
   "main": "index.js",
   "scripts": {
@@ -17,15 +17,20 @@
   },
   "homepage": "https://github.com/mailaneel/immutable-store2#readme",
   "dependencies": {
-    "babel-runtime": "^5.8.12",
-    "eventemitter3": "^1.1.1",
-    "immutable": "^3.7.5",
-    "lodash": "^3.10.1"
+    "babel-runtime": "^6.3.19"
   },
   "devDependencies": {
+    "babel-plugin-add-module-exports": "^0.1.2",
+    "babel-plugin-transform-runtime": "^6.4.0",
+    "babel-preset-es2015-loose": "^6.1.4",
+    "babel-preset-stage-0": "^6.3.13",
     "chai": "^2.3.0",
     "gulp": "^3.8.11",
-    "gulp-babel": "^5.1.0",
+    "gulp-babel": "^6.1.1",
     "mocha": "^2.2.5"
+  },
+  "peerDependencies": {
+    "immutable": "^3.7.6",
+    "lodash": "3^3.10.1"
   }
 }
